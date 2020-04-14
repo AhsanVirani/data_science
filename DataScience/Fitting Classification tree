@@ -113,3 +113,27 @@ mean((yhat.rf-boston.test)^2)
 importance(rf.boston)
 varImpPlot(rf.boston)
 
+
+
+
+############ BOOSTING
+install.packages("gbm")
+library(gbm)
+set.seed(1)
+boost.boston = gbm(medv~., Boston[train,], distribution = "gaussian",
+                   n.trees = 5000, interaction.depth = 4)
+summary(boost.boston)
+par(mfrow = c(1,2))
+plot(boost.boston, i="rm")
+?plot
+plot(boost.boston, i="lstat")
+yhat.boost = predict(boost.boston, Boston[-train,], n.trees = 5000)
+mean((yhat.boost - boston.test)^2)
+
+
+# Modify Alpha i.e. penalty
+boost.boston = gbm(medv~., Boston[train,], distribution = "gaussian",
+                   n.trees = 5000, interaction.depth = 4, shrinkage = 0.2,
+                   verbose = F)
+yhat.boost = predict(boost.boston, Boston[-train,], n.trees = 5000)
+mean((yhat.boost - boston.test)^2)
