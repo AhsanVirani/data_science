@@ -37,3 +37,50 @@ lines(1:500, rf.boston.proot$test$mse, col = "blue", type = "l")
 legend("topright", c("m=p", "m=p/2", "m=sqrt(p)"), col = c("green", "red", "blue"), 
        cex = 1, lty = 1)
 
+
+
+## Q8
+library(ISLR)
+fix(Carseats)
+attach(Carseats)
+train = sample(nrow(Carseats), nrow(Carseats)/2)
+x.train = Carseats[train,]
+x.test = Carseats[-train,]
+
+?tree
+tree.Carseats <- tree(Sales~., Carseats,
+                      subset = train)
+summary(tree.Carseats)
+plot(tree.Carseats)
+text(tree.Carseats, pretty = 0)
+pred.carseats <- predict(tree.Carseats, x.test)
+mean((Carseats$Sales[-train] - pred.carseats)^2)
+
+#c
+?cv.tree
+cv.carseats <- cv.tree(tree.Carseats, FUN = prune.tree)
+par(mfrow = c(1,2))
+plot(cv.carseats$size, cv.carseats$dev, type = "b")
+plot(cv.carseats$k, cv.carseats$dev, type = "b")
+?plot
+# Best size 10
+prune_carseats <- prune.tree(tree.Carseats, best = 10)
+par(mfrow = c(1, 1))
+plot(prune_carseats)
+text(prune_carseats, pretty = 0)
+pred.pruned = predict(prune_carseats, x.test)
+mean((Carseats$Sales[-train] - pred.pruned)^2)
+# Increased
+
+##### BAGGING
+?randomForest
+bag_carseats <- randomForest(Sales~., data = x.train, mtry = 10, 
+                             ntree = 500, importance = T )
+bag.pred <- predict(bag_carseats, x.test)
+mean((Carseats$Sales[-train] - bag.pred)^2)
+importance(bag_carseats)
+rf.carseats <- randomForest(Sales~., data = x.train, mtry = 5, 
+                            ntree = 500, importance = T)
+rf_pred <- predict(rf.carseats, x.test)
+mean((Carseats$Sales[-train] - rf_pred)^2)
+importance(rf.carseats)
