@@ -1,0 +1,39 @@
+################# Trees Questions ##############################
+#Q7
+library(MASS)
+fix(Boston)
+library(randomForest)
+library(tree)
+attach(Boston)
+?tree
+?randomForest
+set.seed(1)
+
+# Create train and test data
+train = sample(nrow(Boston), nrow(Boston)/2)
+x.test = Boston[-train, -14]
+test_response = Boston[-train, 14]
+x.train = Boston[train, -14]
+train_response = Boston[train, 14]
+
+# number of independent variables
+p = dim(Boston)[2] - 1
+p_half = p/2
+p_root = sqrt(p)
+
+rf.boston.p <- randomForest(x = x.train, y = train_response,
+                            xtest = x.test, ytest = test_response,
+                            mtry = p, ntree = 500)
+rf.boston.phalf <- randomForest(x = x.train, y = train_response,
+                            xtest = x.test, ytest = test_response,
+                            mtry = p_half, ntree = 500)
+rf.boston.proot <- randomForest(x = x.train, y = train_response,
+                            xtest = x.test, ytest = test_response,
+                            mtry = p_root, ntree = 500)
+plot(1:500, rf.boston.p$test$mse, col = "green", type = "l",
+     xlab = "Number of trees", ylab = "Test MSE", ylim = c(15, 40))
+lines(1:500, rf.boston.phalf$test$mse, col = "red", type = "l")
+lines(1:500, rf.boston.proot$test$mse, col = "blue", type = "l")
+legend("topright", c("m=p", "m=p/2", "m=sqrt(p)"), col = c("green", "red", "blue"), 
+       cex = 1, lty = 1)
+
