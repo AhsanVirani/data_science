@@ -120,3 +120,39 @@ missclass_pred = missclass_pred/length(pred_tree)
 missclass_pred_unp <- sum(tree.pred != OJ$Purchase[-train])
 missclass_pred_unp = missclass_pred_unp/length(tree.pred)
 
+
+
+fix(Hitters)
+?na.omit
+Hitters <- na.omit(Hitters)
+Hitters$Salary <- log(Hitters$Salary)
+train <- sample(nrow(Hitters), 200)
+train.x = Hitters[train,]
+test.x = Hitters[-train,]
+library(gbm)
+?gbm
+?seq
+shrink_para <- seq(-10, -0.2, by = 0.1)
+shrink_para = 10^shrink_para
+mse_train <- rep(0, length(shrink_para))
+mse_test <- rep(0, length(shrink_para))
+
+
+for (i in 1:length(shrink_para)) {
+  boost_hitters <- gbm(Salary~., distribution = "gaussian",
+                       data = train.x, n.trees = 1000, 
+                       shrinkage = shrink_para[i] )
+  train_pred <- predict(boost_hitters, train.x, n.trees = 1000)
+  test_pred <- predict(boost_hitters, test.x, n.trees = 1000)
+  mse_train[i] = mean((train.x$Salary - train_pred)^2)
+  mse_test[i] = mean((test.x$Salary - test_pred)^2)
+  
+}
+
+plot(shrink_para, mse_train, type = "b", col = "blue", 
+     xlab = "Shrinkage", ylab = "MSE",main = "MSE against Shrinkage")
+plot(shrink_para, mse_test, type = "b", col = "blue", 
+     xlab = "Shrinkage", ylab = "MSE",main = "MSE against Shrinkage")
+
+
+
