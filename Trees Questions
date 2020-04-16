@@ -84,3 +84,39 @@ rf.carseats <- randomForest(Sales~., data = x.train, mtry = 5,
 rf_pred <- predict(rf.carseats, x.test)
 mean((Carseats$Sales[-train] - rf_pred)^2)
 importance(rf.carseats)
+
+
+
+
+########### Q9
+library(ISLR)
+fix(OJ)
+attach(OJ)
+train = sample(nrow(OJ), 800)
+x.test = OJ[-train, -1]
+?tree
+tree.OJ <- tree(Purchase~., data = OJ, subset = train)
+summary(tree.OJ)
+plot(tree.OJ)
+text(tree.OJ)
+
+tree.pred = predict(tree.OJ, x.test, type = "class")
+table(tree.pred, OJ$Purchase[-train])
+(141+84)/(270)
+?cv.tree
+cv.OJ = cv.tree(tree.OJ, FUN = prune.tree)
+plot(cv.OJ$size, cv.OJ$dev, type = "b")
+
+# optimal size is 5
+# Pruning the tree
+prune_OJ = prune.tree(tree.OJ, best = 5)
+summary(prune_OJ)
+
+pred_tree = predict(prune_OJ, x.test, type = "class")
+table(pred_tree, OJ$Purchase[-train])
+(131+84)/270
+missclass_pred <- sum(pred_tree != OJ$Purchase[-train])
+missclass_pred = missclass_pred/length(pred_tree)
+missclass_pred_unp <- sum(tree.pred != OJ$Purchase[-train])
+missclass_pred_unp = missclass_pred_unp/length(tree.pred)
+
