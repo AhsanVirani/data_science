@@ -155,4 +155,53 @@ plot(shrink_para, mse_test, type = "b", col = "blue",
      xlab = "Shrinkage", ylab = "MSE",main = "MSE against Shrinkage")
 
 
+# Q11
+
+library(ISLR)
+rm(Caravan)
+fix(Caravan)
+attach(Caravan)
+
+Caravan$Purchase = ifelse(Caravan$Purchase == "Yes", 1, 0)
+head(Purchase)
+
+
+train <- sample(nrow(Caravan), 1000)
+train.x <- Caravan[train,]
+test.x <- Caravan[-train,]
+
+# b
+?gbm
+library(gbm)
+gbm_caravan <- gbm(Purchase~., data = train.x, distribution = "bernoulli",
+                   n.trees = 1000, shrinkage = 0.01 )
+summary(gbm_caravan)
+
+# c
+caravan_pred <- predict(gbm_caravan, test.x, type = "response",
+                        n.trees = 1000)
+caravan_prob <- rep("0", nrow(test.x))
+caravan_prob[caravan_pred > 0.2] = "1"
+table(caravan_prob, test.x$Purchase)
+Error_rate <- (144+263)/4822 * 100
+33/(144+33)
+
+# Compare results with KNN or Log
+# logistic
+?glm
+log_caravan <- glm(Purchase~., family = binomial, data = train.x)
+log_pred <- predict(log_caravan, test.x, type = "response")
+log_pred <- ifelse(log_pred > 0.2, 1, 0)
+table(log_pred, test.x$Purchase)
+50/(50+260) * 100
+# Lower than boosting
+
+# KNN
+library(class)
+?knn
+train_knn <- train.x[,-86]
+test_knn <- test.x[,-86]
+train_lab <- train.x$Purchase
+knn_pred = knn(train_knn, test_knn, train_lab, k = 5)
+table(knn_pred, test.x$Purchase)
 
