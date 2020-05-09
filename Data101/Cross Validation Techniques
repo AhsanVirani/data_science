@@ -1,0 +1,48 @@
+library(ISLR)
+set.seed(1)
+fix(Auto)
+dim(Auto)
+?sample
+train = sample(392, (392/2))
+
+lm.fit = lm(mpg~horsepower, data=Auto, subset = train)
+attach(Auto)
+ # MSE. 1) Residual (yi - y^) 2) square residual 3) Mean
+mpg_pred <- predict(lm.fit, Auto, type = 'response')
+mean_err <- mean(((mpg-mpg_pred)[-train])^2)
+
+# poly functions fit and error rates.
+lm.fit1 = lm(mpg~poly(horsepower,2), data=Auto, subset = train)                
+mpg_pred1 <- predict(lm.fit1, Auto, type = 'response')
+mean_err1 <- mean(((mpg-mpg_pred1)[-train])^2)
+
+lm.fit2 = lm(mpg~poly(horsepower,3), data=Auto, subset = train)                
+mpg_pred2 <- predict(lm.fit2, Auto, type = 'response')
+mean_err2 <- mean(((mpg-mpg_pred2)[-train])^2)
+
+# Leave one out cross validation
+# CV could be performed using cv.glm. glm with family!=binomial = lm
+library(boot)
+glm.fit = glm(mpg~horsepower, data = Auto)
+?cv.glm
+cv.err=cv.glm(Auto, glm.fit)
+attributes(cv.err)
+# LOOCV
+cv.err$delta
+
+cv.err <- rep(0, 5)
+for (i in 1:5) {
+  glm.fit=glm(mpg~poly(horsepower, i), data=Auto)
+  cv.err[i] = cv.glm(Auto, glm.fit)$delta
+}
+cv.err
+# Quad is good
+
+## K-Fold Cross Validation
+set.seed(17)
+cv.error.10 = rep(0, 10)
+for(i in 1:10) {
+  glm.fit=glm(mpg~poly(horsepower, 1), data = Auto) 
+  cv.error.10[i]=cv.glm(Auto, glm.fit, K=10)$delta
+}
+cv.error.10
