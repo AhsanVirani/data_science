@@ -1,1 +1,1 @@
-Initial commit
+Getting Starting in Data Science in R
